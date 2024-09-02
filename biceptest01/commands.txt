@@ -63,3 +63,6 @@ git log --graph
 #My local bicep is updated, I need to sync my updates from bicep branch to main branch
 git checkout main
 git merge bicep
+
+#pushing from remote branch to main branch directly
+git push origin bicep:main
