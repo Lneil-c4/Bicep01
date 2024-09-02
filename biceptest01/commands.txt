@@ -3,6 +3,7 @@ az login --tenant 3clouddemo.com
 az account show
 
 az deployment group what-if -g "NeilLorca-3CMS" -f .\main.bicep
+az deployment group create -g "NeilLorca-3CMS" -f .\main.bicep -c
 
 git init
 
