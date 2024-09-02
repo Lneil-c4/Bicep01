@@ -66,3 +66,12 @@ git merge bicep
 
 #pushing from remote branch to main branch directly
 git push origin bicep:main
+
+#fetch latest changes from remote repository
+git fetch origin
+
+#merge remote main to local main 
+git merge origin/main
+
+#merge remote main to local main with unrelated histories
+git merge origin/main --allow-unrelated-histories
