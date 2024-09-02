@@ -1,5 +1,5 @@
 @description('Main VNet Name')
-param mainvnet string = 'main2vnet'
+param mainvnet string = 'bicep-eus-vnet'
 
 @description('Azure Location')
 param azlocation string = 'eastus'
@@ -12,22 +12,27 @@ param subnets object = {
   subnet2: {
     prefix: '10.0.1.0/24'
   }
+  subnet3: {
+    prefix: '10.0.3.0/24'
+  }
 }
 
-@description('VMs')
-param vmsall object = {
-  'vm-eus-11':{
+@description('List of VMs with its subnets')
+param vmlist object = {
+  'vm-bicep-eus-01':{
     subnetName: 'subnet1'
   }
-  'vm-eus-22':{
-    subnetName: 'subnet2'
+  'vm-bicep-eus-02':{
+    subnetName: 'subnet1'
   }
 }
 
+@description('Tags of Azure Resources')
 param tags object = {
   Task: 'IaC Activity'
 }
 
+@description('NSG Rules')
 param nsgrules object = {
   allow3389: {
     destinationPortRange: 3389
@@ -51,9 +56,10 @@ param nsgrules object = {
 ]*/
 
 @description('VM Accounts')
-param vmUName string = 'testuser'
+param vmUName string = 'demoadmin'
 
 @secure()
+@minLength(12)
 param vmPword string
 
 targetScope = 'resourceGroup'
@@ -83,7 +89,7 @@ resource mainVirtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
   }
 }
 
-resource prodNetworkInterface 'Microsoft.Network/networkInterfaces@2020-11-01' = [for vm in objectKeys(vmsall): {
+resource prodNetworkInterface 'Microsoft.Network/networkInterfaces@2020-11-01' = [for vm in objectKeys(vmlist): {
   dependsOn: [
     mainVirtualNetwork
   ]
@@ -97,7 +103,7 @@ resource prodNetworkInterface 'Microsoft.Network/networkInterfaces@2020-11-01' =
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', mainvnet, vmsall[vm].subnetName)
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets', mainvnet, vmlist[vm].subnetName)
           }
         }
       }
@@ -105,7 +111,7 @@ resource prodNetworkInterface 'Microsoft.Network/networkInterfaces@2020-11-01' =
   }
 }]
 
-/*resource prodwindowsVM 'Microsoft.Compute/virtualMachines@2020-12-01' = [for vm in objectKeys(vmsall): {
+/*resource prodwindowsVM 'Microsoft.Compute/virtualMachines@2020-12-01' = [for vm in objectKeys(vmlist): {
   dependsOn: [
     prodNetworkInterface
   ]
@@ -151,7 +157,7 @@ resource prodNetworkInterface 'Microsoft.Network/networkInterfaces@2020-11-01' =
 }]
   */
 
-  module winVMs './module/vm/winvm.bicep' = [ for vm in objectKeys(vmsall): {
+  module winVMs './module/vm/winvm.bicep' = [ for vm in objectKeys(vmlist): {
     name: 'WindowsVMDeployment-${vm}'
     scope: resourceGroup()
     params: {
