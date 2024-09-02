@@ -29,7 +29,7 @@ param vmlist object = {
 
 @description('Tags of Azure Resources')
 param tags object = {
-  Task: 'IaC Activity'
+  Task: 'Bicep-IaC'
 }
 
 @description('NSG Rules')
